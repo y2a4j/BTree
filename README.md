@@ -1,3 +1,3 @@
 # BTree
 
-B-Tree implemented in c++.
+B-Tree data structure implemented in c++.
