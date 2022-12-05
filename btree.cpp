@@ -124,20 +124,23 @@ void BTreeNode::traverse(){
     if(leaf == false){
         child[i]->traverse();//木の右側
     }
+
 }
 
 BTreeNode *BTreeNode::search(int k){
     
     BTreeNode *c = this;
-    while(c != NULL){
+    while(c->keycount != 0){
         int i = 0;
         while(i < c->keycount && k > c->key[i]){//キーがありそうな場所を探す
             i++;
         }
 
-        if(c->key[i] == k){//キーがあったら返す
-            return c;
-        }
+        if(c->keycount > i){
+            if(c->key[i] == k){//キーがあったら返す
+                return c;
+            }
+        } 
 
         if(c->leaf == true){//キーがないときNULL
             //delete c;
@@ -352,14 +355,13 @@ vector<BTreeNode*> BTreeNode::delSearch(int k){
         while(i < c->keycount && k > c->key[i]){//キーがありそうな場所を探す
             i++;
         }
-
-        if(c->key[i] == k){//キーがあったら返す
-            //delete c;
-            return pas;
+        if(c->keycount > i){
+            if(c->key[i] == k){//キーがあったら返す
+                return pas;
+            }
         }
         c = c->child[i];//次の子ノードを見る
     }
-    //delete c;
     return pas;
 
 }
@@ -373,7 +375,6 @@ BTreeNode *BTreeNode::adjustNode(BTreeNode *n, BTreeNode *np){
     if(n->keycount >= MIN_DEGREE-1){
         return this;
     }
-
     //a 右シフト
     if(l >= 1){
         leftn = np->child[l-1];
@@ -703,15 +704,26 @@ int main(){
     cout << "--------------------------------------" << endl;
 
     t.bdelete(55);
+    t.print();
+    cout << "--------------------------------------" << endl;
+    t.traverse();
+    cout << endl;
     t.bdelete(46);
+    t.traverse();
+    cout << endl;
+    t.print();
+    cout << "--------------------------------------" << endl;
+
+    
     t.bdelete(50);
     cout << "height " << t.height << endl;
     t.print();
     cout << "--------------------------------------" << endl;
+    
     t.bdelete(29);
     t.print();
     cout << "--------------------------------------" << endl;
-
+    
     t.bdelete(27);
     t.bdelete(25);
     t.bdelete(28);
@@ -719,11 +731,17 @@ int main(){
     cout << "--------------------------------------" << endl;
 
     t.bdelete(87);
+    t.print();
+    cout << "--------------------------------------" << endl;
     t.bdelete(84);
+    t.print();
+    cout << "--------------------------------------" << endl;
+    
     t.bdelete(76);
     t.print();
     cout << "--------------------------------------" << endl;
 
+    
     t.bdelete(4);
     t.print();
     cout << "--------------------------------------" << endl;
@@ -740,12 +758,67 @@ int main(){
     t.print();
     cout << "--------------------------------------" << endl;
     t.bdelete(36);
+    t.print();
+    cout << "--------------------------------------" << endl;
+
+    
     t.bdelete(17);
     t.print();
     cout << "--------------------------------------" << endl;
     t.bdelete(1);
     t.print();
+    cout << "--------------------------------------" << endl;
 
+    t.insert(1);
+    t.insert(99);
+    t.insert(55);
+    t.insert(77);
+    t.insert(22);
+    t.insert(33);
+    t.insert(76);
+    t.insert(4);
+    t.insert(15);
+    t.insert(17);
+    t.insert(92);
+    t.insert(84);
+    t.insert(47);
+    t.insert(25);
+    t.insert(9);
+    
+    t.insert(11);
+    t.insert(62);
+    t.insert(46);
+    t.insert(19);
+    t.insert(87);
+    t.insert(79);
+    t.insert(59);
+    t.insert(3);
+    t.insert(40);
+    t.insert(17);
+    t.insert(43);
+    t.insert(57);
+    t.insert(87);
+    t.insert(7);
+    t.insert(27);
+    t.insert(28);
+    t.insert(29);
+    t.insert(23);
+    t.insert(16);
+    t.insert(35);
+    t.insert(36);
+    t.insert(39);
+    t.insert(30);
+    t.insert(50);
+    t.insert(51);
+    t.insert(52);
+    t.insert(53);
+    t.insert(49);
+    t.insert(44);
+    t.insert(45);
+    t.insert(49);
+
+    t.print();
+    
     return 0;
 }
 
