@@ -64,6 +64,9 @@ struct BTree{
             root = NULL;
             height = 0;
         }
+        ~BTree(){
+            deleteNode(root);
+        };
         void insert(int k);
         void traverse(){
             if(root != NULL){
@@ -75,6 +78,7 @@ struct BTree{
                 root->print(1);
             }
         }
+        void deleteNode(BTreeNode *root);
         BTreeNode *search(int k){
             if(root == NULL){
                 return NULL;
@@ -105,6 +109,18 @@ struct BTree{
             }
         }
 };
+
+void BTree::deleteNode(BTreeNode *n){
+    if(n->child[0]->keycount != 0){
+        deleteNode(n->child[0]);
+    }
+    for(int i=0; i<n->keycount; i++){
+        if(n->child[i+1]->keycount != 0){
+            deleteNode(n->child[i+1]);
+        }
+    }
+    delete n;
+}
 
 void BTreeNode::testPrint(BTreeNode *n, int keycount){
     for(int i=0; i<keycount; i++){
@@ -143,13 +159,11 @@ BTreeNode *BTreeNode::search(int k){
         } 
 
         if(c->leaf == true){//キーがないときNULL
-            //delete c;
             return NULL;
         }
 
         c = c->child[i];//次の子ノードを見る
     }
-    //delete c;
     return NULL;
 }
 
@@ -309,6 +323,7 @@ void BTreeNode::leftMerge(BTreeNode *leftn, BTreeNode *n, BTreeNode *np){
         np->child[j+1] = np->child[j+2];
     }
     np->keycount--;
+    delete n;
 }
 
 void BTreeNode::rightMerge(BTreeNode *rightn, BTreeNode *n, BTreeNode *np){
@@ -330,6 +345,7 @@ void BTreeNode::rightMerge(BTreeNode *rightn, BTreeNode *n, BTreeNode *np){
         np->child[j+1] = np->child[j+2];
     }
     np->keycount--;
+    delete rightn;
     
 }
 
@@ -368,8 +384,6 @@ vector<BTreeNode*> BTreeNode::delSearch(int k){
 
 BTreeNode *BTreeNode::adjustNode(BTreeNode *n, BTreeNode *np){
 
-    BTreeNode *leftn = new BTreeNode();
-    BTreeNode *rightn = new BTreeNode();
     int l = searchNode(np, n);
 
     if(n->keycount >= MIN_DEGREE-1){
@@ -377,12 +391,10 @@ BTreeNode *BTreeNode::adjustNode(BTreeNode *n, BTreeNode *np){
     }
     //a 右シフト
     if(l >= 1){
-        leftn = np->child[l-1];
+        BTreeNode *leftn = np->child[l-1];
         if(leftn->keycount > MIN_DEGREE-1){
             rightShift(leftn, n, np);
             if(n->keycount >= MIN_DEGREE-1){
-                //delete leftn;
-                //delete rightn;
                 return this;
             }
         }
@@ -390,12 +402,10 @@ BTreeNode *BTreeNode::adjustNode(BTreeNode *n, BTreeNode *np){
 
     //b 左シフト
     if(l < np->keycount){
-        rightn = np->child[l+1];
+        BTreeNode *rightn = np->child[l+1];
         if(rightn->keycount > MIN_DEGREE-1){
             leftShift(rightn, n, np);
             if(n->keycount >= MIN_DEGREE-1){
-                //delete leftn;
-                //delete rightn;
                 return this;
             }
         }
@@ -403,16 +413,13 @@ BTreeNode *BTreeNode::adjustNode(BTreeNode *n, BTreeNode *np){
 
     //c 左兄弟との併合
     if(l >= 1){
-        leftn = np->child[l-1];
+        BTreeNode *leftn = np->child[l-1];
         if(leftn->keycount == MIN_DEGREE-1){
             leftMerge(leftn, n, np);
             if(np->keycount == 0){
-                //delete rightn;
                 return leftn;
             }
             if(np->keycount >= MIN_DEGREE-1){
-                //delete rightn;
-                //delete leftn;
                 return this;
             }    
         }
@@ -420,16 +427,13 @@ BTreeNode *BTreeNode::adjustNode(BTreeNode *n, BTreeNode *np){
 
     //d 右兄弟との併合
     if(l < np->keycount){
-        rightn = np->child[l+1];
+        BTreeNode *rightn = np->child[l+1];
         if(rightn->keycount == MIN_DEGREE-1){
             rightMerge(rightn, n, np);
             if(np->keycount == 0){
-                //delete rightn;
                 return n;
             }
             if(np->keycount >= MIN_DEGREE-1){
-                //delete leftn;
-                //delete rightn;
                 return this;
             }
         }
@@ -439,13 +443,13 @@ BTreeNode *BTreeNode::adjustNode(BTreeNode *n, BTreeNode *np){
 
 
 BTreeNode *BTreeNode::bdelete(int k, int height){
-    BTreeNode *newroot = this;
     BTreeNode *s = search(k);
     if(s == NULL){//該当キーがないとき終了
         return this;
     }
 
-    BTreeNode *n = new BTreeNode(this->leaf);
+    BTreeNode *newroot = this;
+    BTreeNode *n;
     vector<BTreeNode*> pas = delSearch(k);
 
     //該当キーの添え字を記録
@@ -513,8 +517,6 @@ BTreeNode *BTreeNode::bdelete(int k, int height){
             n = t1;
         }
 
-        //delete t;
-        //delete t1;
         pas.pop_back();
     }else{//該当キーが葉にあったら
 
@@ -536,14 +538,12 @@ BTreeNode *BTreeNode::bdelete(int k, int height){
     }
 
     if(n->keycount >= MIN_DEGREE-1){
-        //delete s;
-        //delete n;
         return newroot;
     }
 
     //ノードの調整
     bool flag = true;
-    BTreeNode *np = new BTreeNode();
+    BTreeNode *np;
     while(flag){
         np = pas.back();
         pas.pop_back();
@@ -553,9 +553,6 @@ BTreeNode *BTreeNode::bdelete(int k, int height){
             flag = false;
         }
     }
-    //delete s;
-    //delete n;
-    //delete np;
     return newroot;
 }
 
@@ -706,10 +703,8 @@ int main(){
     t.bdelete(55);
     t.print();
     cout << "--------------------------------------" << endl;
-    t.traverse();
     cout << endl;
     t.bdelete(46);
-    t.traverse();
     cout << endl;
     t.print();
     cout << "--------------------------------------" << endl;
